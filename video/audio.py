@@ -1,4 +1,4 @@
-"""Bande-son synthétique (sombre, house mélodique en la mineur) calée sur la chronologie de la vidéo.
+"""Bande-son d'ambiance, sans rythmique : piano doux, nappes, basse très discrète, reverb longue.
 Lit out/timeline.json -> écrit out/audio.wav (stéréo 44,1 kHz)."""
 import json
 import numpy as np
@@ -7,10 +7,9 @@ from scipy.signal import butter, sosfilt, fftconvolve
 
 SR = 44100
 tl = json.load(open('out/timeline.json'))
-TOTAL, BPM = tl['total'], tl['bpm']
-BEAT = 60 / BPM
+TOTAL = tl['total']
 N = int((TOTAL + 0.5) * SR)
-rng = np.random.default_rng(5)
+rng = np.random.default_rng(11)
 tt = np.arange(N) / SR
 
 def bus():
@@ -24,204 +23,107 @@ def put(b, start, sig, gain=1.0, pan=0.0):
     b[0, i:i + len(seg)] += seg * gain * np.cos((pan + 1) * np.pi / 4)
     b[1, i:i + len(seg)] += seg * gain * np.sin((pan + 1) * np.pi / 4)
 
-def filt(x, kind, fc, order=4):
-    sos = butter(order, fc, btype=kind, fs=SR, output='sos')
-    return sosfilt(sos, x, axis=-1)
+def filt(x, kind, fc, order=2):
+    return sosfilt(butter(order, fc, btype=kind, fs=SR, output='sos'), x, axis=-1)
 
-def env_t(n):
+def tvec(n):
     return np.arange(n) / SR
 
-scene_starts = [s['t0'] for s in tl['scenes']]
-brand_t = next(s['t0'] for s in tl['scenes'] if s['name'] == 'brand')
-form_t = next((s['t0'] for s in tl['scenes'] if s['name'].startswith('formula')), brand_t)
-cta_t = next(s['t0'] for s in tl['scenes'] if s['name'] == 'cta')
-
-# ---- progression Am - F - C - G (1 accord par mesure de 4 temps) ----
-roots = [55.0, 43.65, 65.41, 49.0]
-chords = [[220.0, 261.63, 329.63], [174.61, 220.0, 261.63], [261.63, 329.63, 392.0], [196.0, 246.94, 293.66]]
-BAR = 4 * BEAT
+BAR = 4.0
 nbars = int(np.ceil(TOTAL / BAR)) + 1
+# Am(add9) - Fmaj7 - Cmaj7(add9) - G(6/9)
+bass = [55.0, 43.65, 65.41, 49.0]
+pads = [[110.0, 164.81, 246.94, 261.63], [130.81, 174.61, 220.0, 329.63], [196.0, 246.94, 293.66, 329.63], [146.83, 196.0, 246.94, 293.66]]
+tones = [[329.63, 440.0, 493.88, 523.25, 659.25], [261.63, 349.23, 440.0, 523.25, 659.25], [329.63, 392.0, 493.88, 587.33, 659.25], [293.66, 392.0, 440.0, 493.88, 587.33]]
 
-drums, music, fx = bus(), bus(), bus()
+pad_b, bass_b, pluck_b, fx_b = bus(), bus(), bus(), bus()
 
-# ---- grosse caisse ----
-def kick():
-    t = env_t(int(0.4 * SR))
-    f = 46 + 120 * np.exp(-t * 30)
-    ph = 2 * np.pi * np.cumsum(f) / SR
-    s = np.sin(ph) * np.exp(-t * 7.5)
-    s[: int(0.004 * SR)] += rng.normal(0, 0.5, int(0.004 * SR)) * 0.6
-    return np.tanh(s * 1.8)
-
-K = kick()
-nb = int(TOTAL / BEAT) + 1
-for k in range(nb):
-    put(drums, k * BEAT, K, 0.95)
-
-# ---- charleston ----
-def hat(open_=False):
-    n = int((0.35 if open_ else 0.07) * SR)
-    t = env_t(n)
-    s = filt(rng.normal(0, 1, n), 'highpass', 7500, 4) * np.exp(-t * (14 if open_ else 70))
-    return s
-H_C, H_O = hat(False), hat(True)
-for k in range(nb * 2):
-    t0 = k * BEAT / 2
-    if k % 2 == 1:
-        put(drums, t0, H_O, 0.20, 0.15)
-    elif t0 >= brand_t:
-        put(drums, t0, H_C, 0.07, -0.2)
-if form_t < TOTAL:
-    for k in range(int(TOTAL / (BEAT / 4)) + 1):
-        t0 = k * BEAT / 4
-        if t0 >= form_t and k % 2 == 1:
-            put(drums, t0, H_C, 0.05 + 0.04 * (k % 4 == 3), 0.25)
-
-# ---- clap (temps 2 et 4) à partir des formules ----
-def clap():
-    n = int(0.3 * SR)
-    t = env_t(n)
-    base = filt(rng.normal(0, 1, n), 'bandpass', [1100, 3800], 2)
-    e = np.exp(-t * 16) + 0.6 * np.exp(-((t - 0.011) % 0.011) * 200) * (t < 0.03)
-    return base * e
-CL = clap()
-for k in range(nb):
-    t0 = k * BEAT
-    if k % 2 == 1 and t0 >= form_t - BEAT * 2:
-        put(drums, t0, CL, 0.5)
-
-# ---- basse (croches décalées) ----
-bass_saw, bass_sub = bus(), bus()
-for k in range(nb * 2):
-    t0 = k * BEAT / 2
-    if k % 2 == 0:
-        continue
-    root = roots[int(t0 // BAR) % 4]
-    n = int(BEAT * 0.45 * SR)
-    t = env_t(n)
-    e = np.minimum(t / 0.006, 1) * np.exp(-t * 4.5)
-    saw = 2 * ((root * 2 * t) % 1) - 1
-    put(bass_saw, t0, saw * e, 0.6)
-    put(bass_sub, t0, np.sin(2 * np.pi * root * t) * e, 0.95)
-music += filt(bass_saw, 'lowpass', 420, 4) * 0.55 + bass_sub * 0.55
-
-# ---- nappe (accords) ----
-pad = bus()
+# ---- nappes : attaque lente, très douces ----
 for b in range(nbars):
-    t0 = b * BAR
-    n = int((BAR + 0.5) * SR)
-    t = env_t(n)
-    e = np.minimum(t / 0.55, 1) * np.minimum((BAR + 0.5 - t) / 0.5, 1)
-    for fnote in chords[b % 4]:
-        for det in (-0.006, 0.0, 0.006):
-            f = fnote * (1 + det)
-            put(pad, t0, (2 * ((f * t) % 1) - 1) * e, 0.075, rng.uniform(-0.6, 0.6))
-pad = filt(pad, 'lowpass', 1500, 2)
-# la nappe s'ouvre vers le final
-sweep = np.clip((tt - form_t) / max(cta_t - form_t, 1), 0, 1)
-pad_hi = filt(pad, 'highpass', 900, 2)
-pad = pad * 0.8 + pad_hi * (0.5 * sweep)
-music += pad * 1.0
+    t0 = b * BAR - 0.4
+    n = int((BAR + 2.6) * SR)
+    t = tvec(n)
+    e = np.clip(t / 1.8, 0, 1) ** 1.5 * np.clip((BAR + 2.6 - t) / 2.0, 0, 1)
+    for f in pads[b % 4]:
+        for det in (-0.004, 0.004):
+            s = np.sin(2 * np.pi * f * (1 + det) * t) + 0.25 * np.sin(4 * np.pi * f * (1 + det) * t)
+            put(pad_b, max(t0, 0), s * e if t0 >= 0 else (s * e)[int(-t0 * SR):], 0.032, rng.uniform(-0.7, 0.7))
+    # basse : sinus pur, très discret
+    nb = int((BAR + 2.0) * SR)
+    tb = tvec(nb)
+    eb = np.clip(tb / 1.4, 0, 1) ** 1.3 * np.clip((BAR + 2.0 - tb) / 1.8, 0, 1)
+    put(bass_b, max(b * BAR - 0.2, 0), np.sin(2 * np.pi * bass[b % 4] * tb) * eb * 0.7, 0.20)
+pad_b = filt(pad_b, 'lowpass', 1500)
 
-# ---- arpège (doubles croches) à partir de la scène marque ----
-arp = bus()
-pat = [0, 1, 2, 3, 4, 3, 2, 1]
-for k in range(int(TOTAL / (BEAT / 4)) + 1):
-    t0 = k * BEAT / 4
-    if t0 < brand_t:
-        continue
-    ch = chords[int(t0 // BAR) % 4]
-    tones = ch + [x * 2 for x in ch]
-    f = tones[pat[k % 8]] * 2
-    n = int(0.22 * SR)
-    t = env_t(n)
-    e = np.minimum(t / 0.003, 1) * np.exp(-t * 18)
-    s = (np.sin(2 * np.pi * f * t) + 0.35 * np.sin(4 * np.pi * f * t) + 0.18 * (2 * ((f * t) % 1) - 1)) * e
-    put(arp, t0, s, 0.11 if t0 < form_t else 0.14, 0.45 * (1 if k % 2 else -1))
-# delay ping-pong
-d = int(BEAT * 0.75 * SR)
-for rep, g in enumerate((0.38, 0.2, 0.1), start=1):
-    arp[0, rep * d:] += arp[1, :-rep * d] * g
-    arp[1, rep * d:] += arp[0, :-rep * d] * g * 0.9
-music += arp
+# ---- piano feutré : arpèges lents ----
+def pluck(f, dur=3.0):
+    n = int(dur * SR)
+    t = tvec(n)
+    s = (np.sin(2 * np.pi * f * t) * np.exp(-t * 1.4) + 0.45 * np.sin(4 * np.pi * f * t) * np.exp(-t * 2.4)
+         + 0.2 * np.sin(6 * np.pi * f * t) * np.exp(-t * 3.8) + 0.08 * np.sin(8.02 * np.pi * f * t) * np.exp(-t * 6.0))
+    s *= np.minimum(t / 0.008, 1)
+    s += filt(rng.normal(0, 1, n), 'bandpass', [900, 3000]) * np.exp(-t * 90) * 0.05
+    return s
 
-# réverbération sur nappe + arp
-ir_n = int(1.1 * SR)
-ir_t = env_t(ir_n)
+pattern = [0, 2, 1, 3, 2, 4, 3, 1]
+start_arp = 1.0
+for k in range(int((TOTAL - start_arp) / 0.5) + 1):
+    t0 = start_arp + k * 0.5
+    if t0 > TOTAL - 1.2:
+        break
+    b = int(t0 // BAR)
+    note = tones[b % 4][pattern[k % 8]]
+    swell = min(1.0, (t0 - start_arp) / 5.0)
+    vel = (0.55 + 0.35 * rng.random()) * (0.45 + 0.55 * swell) * (1.0 if k % 8 == 0 else 0.8)
+    put(pluck_b, t0 + rng.uniform(0, 0.012), pluck(note), 0.075 * vel, 0.35 * (1 if k % 2 else -1))
+    # octave grave de temps en temps
+    if k % 8 == 0:
+        put(pluck_b, t0, pluck(note / 2, 3.6), 0.05 * vel, -0.1)
+pluck_b = filt(pluck_b, 'lowpass', 4200)
+
+# ---- air : souffle très léger ----
+air = filt(rng.normal(0, 1, (2, N)), 'bandpass', [600, 3200])
+air *= (0.004 + 0.003 * np.sin(2 * np.pi * tt / 9.0 + 1.0))
+
+# ---- événements : cloches de verre (chime), petits tics (tap), souffles de transition ----
+CH = [880.0, 987.77, 1174.66, 1318.51, 1567.98, 1760.0]
+def chime(n):
+    f = CH[n % len(CH)]
+    L = int(3.0 * SR); t = tvec(L)
+    s = (np.sin(2 * np.pi * f * t) * np.exp(-t * 1.5) + 0.5 * np.sin(2 * np.pi * f * 2.76 * t) * np.exp(-t * 2.8)
+         + 0.25 * np.sin(2 * np.pi * f * 5.4 * t) * np.exp(-t * 5.0))
+    return s * np.minimum(t / 0.004, 1)
+
+def tap():
+    L = int(0.09 * SR); t = tvec(L)
+    return (filt(rng.normal(0, 1, L), 'bandpass', [1800, 5200]) * np.exp(-t * 70) * 0.6 + np.sin(2 * np.pi * 1400 * t) * np.exp(-t * 55) * 0.4)
+
+def breath(dur=1.6):
+    L = int(dur * SR); t = tvec(L)
+    return filt(rng.normal(0, 1, L), 'bandpass', [400, 2600]) * np.sin(np.pi * np.clip(t / dur, 0, 1)) ** 2
+
+for ev in tl.get('events', []):
+    ty = ev['type']
+    if ty == 'chime':
+        put(fx_b, ev['t'], chime(ev.get('n', 0)), 0.09, rng.uniform(-0.3, 0.3))
+    elif ty == 'tap':
+        put(fx_b, ev['t'], tap(), 0.05, rng.uniform(-0.4, 0.4))
+for sc in tl['scenes'][1:]:
+    put(fx_b, sc['t0'] - 1.0, breath(1.6), 0.05, 0.0)
+
+# ---- reverb longue (plaque douce) ----
+irn = int(3.4 * SR); irt = tvec(irn)
 wet = np.zeros((2, N))
 for c in range(2):
-    ir = rng.normal(0, 1, ir_n) * np.exp(-ir_t * 3.6)
-    wet[c] = fftconvolve(pad[c] + arp[c], ir)[:N] * 0.012
-music += wet
+    ir = filt(rng.normal(0, 1, irn), 'lowpass', 5200) * np.exp(-irt * 1.9)
+    ir[: int(0.02 * SR)] *= np.linspace(0, 1, int(0.02 * SR))
+    src = pad_b[c] * 0.6 + pluck_b[c] * 1.0 + fx_b[c] * 1.2
+    wet[c] = fftconvolve(src, ir)[:N] * 0.0062
 
-# ---- sidechain ----
-duck = 1 - 0.72 * np.exp(-((tt % BEAT) * 15))
-music *= duck
-
-# ---- transitions : montée + impact sur chaque coupe ----
-def riser(dur):
-    n = int(dur * SR)
-    t = env_t(n)
-    x = filt(rng.normal(0, 1, n), 'bandpass', [1800, 9000], 2)
-    return x * (t / dur) ** 2.2
-
-def impact():
-    n = int(1.6 * SR)
-    t = env_t(n)
-    f = 38 + 70 * np.exp(-t * 8)
-    sub = np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-t * 2.6)
-    nz = filt(rng.normal(0, 1, n), 'lowpass', 5000, 2) * np.exp(-t * 7)
-    return np.tanh(sub * 1.6) * 0.9 + nz * 0.35
-
-IM = impact()
-for i, ts in enumerate(scene_starts):
-    big = ts == cta_t or i == 0
-    put(fx, ts, IM, 0.75 if big else 0.5)
-    if i > 0:
-        rd = BEAT * (4 if ts == cta_t else 2)
-        put(fx, ts - rd, riser(rd), 0.22 if ts == cta_t else 0.14)
-# petit "whoosh" d'entrée de mots pendant l'accroche
-for k in range(3):
-    put(fx, 0.1 + k * BEAT * 1.5, filt(rng.normal(0, 1, int(0.3 * SR)), 'bandpass', [400, 3000], 2) * np.exp(-env_t(int(0.3 * SR)) * 9), 0.18, -0.3 + 0.3 * k)
-
-
-# ---- effets synchronisés sur les animations (événements de la chronologie) ----
-def whoosh():
-    n = int(0.7 * SR); t = env_t(n)
-    x = filt(rng.normal(0, 1, n), 'bandpass', [500, 7500], 2)
-    return x * np.sin(np.pi * np.clip(t / 0.7, 0, 1)) ** 1.6
-
-def tick():
-    n = int(0.05 * SR); t = env_t(n)
-    return (np.sin(2 * np.pi * 2300 * t) * 0.6 + filt(rng.normal(0, 1, n), 'highpass', 4000, 2) * 0.5) * np.exp(-t * 90)
-
-def ding():
-    n = int(1.1 * SR); t = env_t(n)
-    s = sum(a * np.sin(2 * np.pi * f * t) * np.exp(-t * d) for f, a, d in ((1568, 1.0, 5.0), (2349, 0.55, 6.5), (3136, 0.35, 8.0), (4698, 0.2, 11.0)))
-    return s * np.minimum(t / 0.002, 1)
-
-def snap():
-    n = int(0.12 * SR); t = env_t(n)
-    return filt(rng.normal(0, 1, n), 'bandpass', [1500, 6000], 2) * np.exp(-t * 38)
-
-WH, TK, DG, SN = whoosh(), tick(), ding(), snap()
-for ev in tl.get('events', []):
-    te, ty = ev['t'], ev['type']
-    if ty == 'slam':
-        put(fx, te, IM, 0.32); put(fx, te, SN, 0.45)
-    elif ty == 'whoosh':
-        put(fx, te - 0.3, WH, 0.26, -0.2)
-    elif ty == 'tick':
-        put(fx, te, TK, 0.22, 0.2)
-    elif ty == 'ding':
-        put(fx, te, DG, 0.17, 0.1)
-
-# ---- mixage final ----
-mix = drums * 0.9 + music * 1.0 + fx * 1.0
-mix = np.tanh(mix * 1.15) / np.tanh(1.15)
-fade_out = np.clip((TOTAL + 0.3 - tt) / 1.1, 0, 1)
-fade_in = np.clip(tt / 0.02, 0, 1)
-mix *= fade_out * fade_in
-mix *= 0.72 / max(np.abs(mix).max(), 1e-6)
+mix = pad_b * 0.9 + bass_b + pluck_b * 0.85 + fx_b + wet + air
+# fondu d'entrée/sortie
+mix *= np.clip(tt / 1.5, 0, 1) * np.clip((TOTAL + 0.3 - tt) / 2.6, 0, 1)
+mix = np.tanh(mix * 1.05)
+mix *= 0.55 / max(np.abs(mix).max(), 1e-6)
 wavfile.write('out/audio.wav', SR, (mix.T * 32767).astype(np.int16))
 print(f'audio.wav : {TOTAL + 0.5:.1f} s, pic {np.abs(mix).max():.2f}')
