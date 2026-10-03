@@ -184,6 +184,38 @@ for i, ts in enumerate(scene_starts):
 for k in range(3):
     put(fx, 0.1 + k * BEAT * 1.5, filt(rng.normal(0, 1, int(0.3 * SR)), 'bandpass', [400, 3000], 2) * np.exp(-env_t(int(0.3 * SR)) * 9), 0.18, -0.3 + 0.3 * k)
 
+
+# ---- effets synchronisés sur les animations (événements de la chronologie) ----
+def whoosh():
+    n = int(0.7 * SR); t = env_t(n)
+    x = filt(rng.normal(0, 1, n), 'bandpass', [500, 7500], 2)
+    return x * np.sin(np.pi * np.clip(t / 0.7, 0, 1)) ** 1.6
+
+def tick():
+    n = int(0.05 * SR); t = env_t(n)
+    return (np.sin(2 * np.pi * 2300 * t) * 0.6 + filt(rng.normal(0, 1, n), 'highpass', 4000, 2) * 0.5) * np.exp(-t * 90)
+
+def ding():
+    n = int(1.1 * SR); t = env_t(n)
+    s = sum(a * np.sin(2 * np.pi * f * t) * np.exp(-t * d) for f, a, d in ((1568, 1.0, 5.0), (2349, 0.55, 6.5), (3136, 0.35, 8.0), (4698, 0.2, 11.0)))
+    return s * np.minimum(t / 0.002, 1)
+
+def snap():
+    n = int(0.12 * SR); t = env_t(n)
+    return filt(rng.normal(0, 1, n), 'bandpass', [1500, 6000], 2) * np.exp(-t * 38)
+
+WH, TK, DG, SN = whoosh(), tick(), ding(), snap()
+for ev in tl.get('events', []):
+    te, ty = ev['t'], ev['type']
+    if ty == 'slam':
+        put(fx, te, IM, 0.32); put(fx, te, SN, 0.45)
+    elif ty == 'whoosh':
+        put(fx, te - 0.3, WH, 0.26, -0.2)
+    elif ty == 'tick':
+        put(fx, te, TK, 0.22, 0.2)
+    elif ty == 'ding':
+        put(fx, te, DG, 0.17, 0.1)
+
 # ---- mixage final ----
 mix = drums * 0.9 + music * 1.0 + fx * 1.0
 mix = np.tanh(mix * 1.15) / np.tanh(1.15)

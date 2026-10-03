@@ -1,7 +1,6 @@
 // ============================================================
 //  CONTENU DE LA VIDÉO — c'est le seul fichier à modifier.
-//  Textes repris du site (Starter, Premium, méthodes E-commerce et B2B).
-//  *mot* entre astérisques = mot mis en valeur (doré) dans la scène "promise".
+//  Textes repris du site MATHISDGTMK (Starter, Premium, méthodes E-commerce et B2B).
 // ============================================================
 window.CONTENT = {
   draft: false, // true = affiche "APERÇU — TEXTES PROVISOIRES" en haut
@@ -13,46 +12,34 @@ window.CONTENT = {
     sub: "ACCOMPAGNEMENT E-COMMERCE & B2B",
     monogram: "M",
     tagline: "POUR LES ENTREPRENEURS",
-    url: "imaginary-mathis-growth-labs.base44.app",
+    url: "mathisdgtmk.com",
   },
 
-  // Accroche (la dernière ligne est en violet lumineux)
-  hook: ["TA BOUTIQUE", "EN MACHINE", "de vente."],
-
-  // Scène "promesse" désactivée (lines vide)
-  promise: { kicker: "", lines: [] },
-
-  // Méthodes : 1 scène de 4 s chacune
-  methods: [
-    {
-      kicker: "LA MÉTHODE",
-      title: "E-COMMERCE",
-      sub: "Transformer une boutique en machine de vente structurée.",
-      steps: [
-        { t: "Audit", d: "Analyse de ta boutique, de ton offre et de tes tunnels de vente" },
-        { t: "Offre & positionnement", d: "Offre, prix et parcours d'achat restructurés" },
-        { t: "Acquisition", d: "Campagnes et canaux adaptés pour un trafic qualifié" },
-        { t: "Optimisation", d: "Suivi des performances et itérations continues" },
-      ],
-    },
-    {
-      kicker: "LA MÉTHODE",
-      title: "B2B",
-      sub: "Construire un processus commercial qui signe.",
-      steps: [
-        { t: "Ciblage", d: "Segments, décideurs à atteindre et message de prospection" },
-        { t: "Pipeline", d: "Un processus clair, de la prise de contact à la signature" },
-        { t: "Prospection", d: "Prospection structurée et régulière" },
-        { t: "Clôture & suivi", d: "Négociations, puis suivi pour fidéliser chaque client" },
-      ],
-    },
+  // Accroche : 3 phrases percutantes (1 s, 1 s puis 2 s)
+  hook: [
+    { small: "TON", big: "E-COMMERCE" },
+    { small: "TON", big: "B2B" },
+    { small: "ENFIN", big: "structurés." },
   ],
 
-  // Formules : 1 scène de 7 s par formule. Les prix défilent dans l'ordre de `prices`.
-  formulasTitle: "NOS FORMULES",
+  // Méthodes : 2 s chacune, une étape par temps fort
+  methods: [
+    { kicker: "LA MÉTHODE", title: "E-COMMERCE", steps: ["Audit", "Offre & positionnement", "Acquisition", "Optimisation"] },
+    { kicker: "LA MÉTHODE", title: "B2B", steps: ["Ciblage", "Pipeline", "Prospection", "Clôture & suivi"] },
+  ],
+
+  // Captures de ton site dans des téléphones 3D (images dans assets/)
+  phonesKicker: "SUR MATHISDGTMK.COM",
+  phones: [
+    { img: "assets/starter.jpg", label: "STARTER" },
+    { img: "assets/premium.jpg", label: "PREMIUM" },
+  ],
+
+  // Formules : les prix défilent dans l'ordre de `prices` aux instants `times` (secondes dans la scène)
   formulas: [
     {
-      tag: "FORMULE 01", name: "Starter", sub: "ACCOMPAGNEMENT ACCESSIBLE",
+      tag: "FORMULE 01", name: "Starter", sub: "ACCOMPAGNEMENT ACCESSIBLE", dur: 5,
+      times: [0.6, 2.4, 3.6],
       prices: [
         { value: 149, per: "/ MOIS", label: "MENSUEL" },
         { value: 1490, per: "/ AN", label: "ANNUEL" },
@@ -68,8 +55,9 @@ window.CONTENT = {
       ],
     },
     {
-      tag: "FORMULE 02", name: "Premium", sub: "SUIVI INDIVIDUALISÉ",
+      tag: "FORMULE 02", name: "Premium", sub: "SUIVI INDIVIDUALISÉ", dur: 6,
       featured: true, badge: "ACCOMPAGNEMENT AVANCÉ",
+      times: [0.6, 2.8, 4.3],
       prices: [
         { value: 599, per: "/ MOIS", label: "MENSUEL" },
         { value: 5990, per: "/ AN", label: "ANNUEL" },
@@ -86,12 +74,9 @@ window.CONTENT = {
     },
   ],
 
-  stats: [],
-
   cta: {
-    lines: ["CHOISIS", "TA FORMULE"],
+    lines: ["CHOISIS", "ta formule."],
     button: "JE ME LANCE",
-    sub: "",
     legal: "Prestation de conseil et de soutien stratégique : aucun chiffre d'affaires ni résultat garanti.",
   },
 };
