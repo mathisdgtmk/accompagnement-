@@ -1,61 +1,97 @@
 // ============================================================
 //  CONTENU DE LA VIDÉO — c'est le seul fichier à modifier.
-//  Tout ce qui est marqué "provisoire" est un texte d'attente :
-//  remplace-le par tes vraies formules / vrais prix / vraies promesses.
-//  *mot* entre astérisques = mot mis en valeur (doré).
+//  Textes repris du site (Starter, Premium, méthodes E-commerce et B2B).
+//  *mot* entre astérisques = mot mis en valeur (doré) dans la scène "promise".
 // ============================================================
 window.CONTENT = {
-  draft: true, // true = affiche "APERÇU — TEXTES PROVISOIRES" en haut ; false pour la version finale
+  draft: false, // true = affiche "APERÇU — TEXTES PROVISOIRES" en haut
   fps: 30,
   bpm: 120,
 
   brand: {
-    name: "Mathis",              // provisoire
-    sub: "GROWTH LABS",          // provisoire
+    name: "MATHISDGTMK",
+    sub: "ACCOMPAGNEMENT E-COMMERCE & B2B",
     monogram: "M",
-    tagline: "ACCOMPAGNEMENT PREMIUM", // provisoire
+    tagline: "POUR LES ENTREPRENEURS",
     url: "imaginary-mathis-growth-labs.base44.app",
   },
 
-  // Accroche (3 lignes max, la dernière est en violet lumineux)
-  hook: ["TON BUSINESS", "MÉRITE", "MIEUX."], // provisoire
+  // Accroche (la dernière ligne est en violet lumineux)
+  hook: ["TA BOUTIQUE", "EN MACHINE", "de vente."],
 
-  // Promesse (laisser [] pour sauter la scène)
-  promise: {
-    kicker: "NOTRE PROMESSE", // provisoire
-    lines: [
-      "Une méthode *claire*.",
-      "Un suivi *sur-mesure*.",
-      "Des résultats qui *se voient*.",
-    ], // provisoire
-  },
+  // Scène "promesse" désactivée (lines vide)
+  promise: { kicker: "", lines: [] },
 
-  // Formules : 1 scène de 4 s par formule (3 recommandées)
-  formulasTitle: "NOS FORMULES",
-  formulas: [
+  // Méthodes : 1 scène de 4 s chacune
+  methods: [
     {
-      tag: "FORMULE 01", name: "Essentiel", sub: "POUR DÉMARRER",
-      price: "XX", unit: "€", // prix numérique ex. "97" => compteur animé
-      bullets: ["Avantage n°1", "Avantage n°2", "Avantage n°3"],
+      kicker: "LA MÉTHODE",
+      title: "E-COMMERCE",
+      sub: "Transformer une boutique en machine de vente structurée.",
+      steps: [
+        { t: "Audit", d: "Analyse de ta boutique, de ton offre et de tes tunnels de vente" },
+        { t: "Offre & positionnement", d: "Offre, prix et parcours d'achat restructurés" },
+        { t: "Acquisition", d: "Campagnes et canaux adaptés pour un trafic qualifié" },
+        { t: "Optimisation", d: "Suivi des performances et itérations continues" },
+      ],
     },
     {
-      tag: "FORMULE 02", name: "Premium", sub: "LE CHOIX GAGNANT",
-      price: "XX", unit: "€", featured: true, badge: "LE PLUS POPULAIRE",
-      bullets: ["Tout l’Essentiel", "Avantage n°2", "Avantage n°3", "Avantage n°4"],
-    },
-    {
-      tag: "FORMULE 03", name: "Élite", sub: "POUR ALLER LOIN",
-      price: "XX", unit: "€",
-      bullets: ["Tout le Premium", "Avantage n°2", "Avantage n°3", "Avantage n°4"],
+      kicker: "LA MÉTHODE",
+      title: "B2B",
+      sub: "Construire un processus commercial qui signe.",
+      steps: [
+        { t: "Ciblage", d: "Segments, décideurs à atteindre et message de prospection" },
+        { t: "Pipeline", d: "Un processus clair, de la prise de contact à la signature" },
+        { t: "Prospection", d: "Prospection structurée et régulière" },
+        { t: "Clôture & suivi", d: "Négociations, puis suivi pour fidéliser chaque client" },
+      ],
     },
   ],
 
-  // Chiffres clés (laisser [] pour sauter la scène). Ex : { value: 120, prefix: "+", suffix: "", label: "CLIENTS ACCOMPAGNÉS" }
+  // Formules : 1 scène de 7 s par formule. Les prix défilent dans l'ordre de `prices`.
+  formulasTitle: "NOS FORMULES",
+  formulas: [
+    {
+      tag: "FORMULE 01", name: "Starter", sub: "ACCOMPAGNEMENT ACCESSIBLE",
+      prices: [
+        { value: 149, per: "/ MOIS", label: "MENSUEL" },
+        { value: 1490, per: "/ AN", label: "ANNUEL" },
+        { value: 2490, per: "AU TOTAL", label: "PAIEMENT UNIQUE" },
+      ],
+      commission: { value: "5 %", note: "sur les ventes attribuables" },
+      bullets: [
+        "Définition des objectifs",
+        "Aide au choix du produit ou du service",
+        "Création de boutique ou d'offre B2B",
+        "Conseils en prospection",
+        "Stratégie de contenu réseaux sociaux",
+      ],
+    },
+    {
+      tag: "FORMULE 02", name: "Premium", sub: "SUIVI INDIVIDUALISÉ",
+      featured: true, badge: "ACCOMPAGNEMENT AVANCÉ",
+      prices: [
+        { value: 599, per: "/ MOIS", label: "MENSUEL" },
+        { value: 5990, per: "/ AN", label: "ANNUEL" },
+        { value: 9990, per: "AU TOTAL", label: "PAIEMENT UNIQUE" },
+      ],
+      commission: { value: "0 %", note: "sur les ventes" },
+      bullets: [
+        "Tous les avantages du Starter",
+        "Stratégie personnalisée",
+        "Système de prospection",
+        "2 rendez-vous individuels par semaine",
+        "Analyse des performances",
+      ],
+    },
+  ],
+
   stats: [],
 
   cta: {
-    lines: ["RÉSERVE", "TA PLACE"],
+    lines: ["CHOISIS", "TA FORMULE"],
     button: "JE ME LANCE",
     sub: "",
+    legal: "Prestation de conseil et de soutien stratégique : aucun chiffre d'affaires ni résultat garanti.",
   },
 };
