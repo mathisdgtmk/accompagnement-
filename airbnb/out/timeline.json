@@ -1,0 +1,30 @@
+{
+  "cuts": [
+    0.0,
+    3.0,
+    7.0,
+    11.0,
+    14.0,
+    18.0,
+    22.0,
+    26.0,
+    29.0,
+    34.0
+  ],
+  "total": 40.0,
+  "bpm": 120.0,
+  "dissolve": 0.7,
+  "shots": [
+    "hook_jacuzzi_vue",
+    "arrivee_terrasse",
+    "salon",
+    "salon_vue",
+    "cuisine",
+    "chambre",
+    "salle_de_bain",
+    "jacuzzi",
+    "terrasse_pano",
+    "final_vue_mer"
+  ],
+  "fps": 30
+}

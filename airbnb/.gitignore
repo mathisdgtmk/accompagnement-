@@ -1,0 +1,5 @@
+# Intermédiaires régénérables (le master fait ~260 Mo à cause du grain)
+out/master_intermediaire.mp4
+out/stills/
+out/music.wav
+__pycache__/
