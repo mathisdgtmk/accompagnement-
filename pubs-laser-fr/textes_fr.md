@@ -31,3 +31,29 @@ plus une narration française qui lit le texte à l'écran.
 - Narration : synthèse vocale française (Piper « siwis »).
 - Les répliques anglaises d'origine, retirées de l'audio : « Oh my god! », « What happened? », « Oh my god, sorry! »,
   « That's two, I'm winning! », « Oh, I'm hit! » (retranscription automatique, mots exacts approximatifs).
+
+---
+
+# Lot 2 : texte à l'écran seulement (audio d'origine conservé, non modifié)
+
+Les 5 vidéos suivantes ont uniquement le texte incrusté traduit. L'audio est celui de l'original, recopié tel quel (anglais compris).
+Les emojis d'origine et les « Vs... » sont conservés.
+
+## 5. `pub-laser-5_probleme-solution-C_FR.mp4`
+- « The problem 😬 » → **Le problème** 😬
+- « Vs... » → conservé
+- « The solution 🤩 » → **La solution** 🤩
+
+## 6. `pub-laser-6_mamans-gagnent-noel_FR.mp4`
+- « Moms, THIS is how you win Christmas 🎄😭 » → **Mamans, VOILÀ comment on gagne Noël** 🎄😭
+
+## 7. `pub-laser-7_probleme-solution-D_FR.mp4`
+- « The problem 😬 » → **Le problème** 😬
+- « Vs... » → conservé
+- « The solution 🤩 » → **La solution** 🤩
+
+## 8. `pub-laser-8_tata-GOAT_FR.mp4`
+- « POV: You just locked in GOAT AUNT status this Christmas 🐐🎄 » → **POV : tu viens de décrocher le statut de tata GOAT pour Noël** 🐐🎄
+
+## 9. `pub-laser-9_maman-de-garcons_FR.mp4`
+- « DO NOT let a BOY mom see this... 🤩🔫 » → **NE LAISSE PAS une maman de GARÇONS voir ça...** 🤩🔫
