@@ -1,0 +1,6 @@
+# Intermédiaires régénérables
+out/video_sans_son.mp4
+out/stills/
+out/music.wav
+out/audio_*.wav
+__pycache__/
