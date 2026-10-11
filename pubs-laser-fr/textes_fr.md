@@ -57,3 +57,16 @@ Les emojis d'origine et les « Vs... » sont conservés.
 
 ## 9. `pub-laser-9_maman-de-garcons_FR.mp4`
 - « DO NOT let a BOY mom see this... 🤩🔫 » → **NE LAISSE PAS une maman de GARÇONS voir ça...** 🤩🔫
+
+---
+
+# Lot 3 : texte à l'écran seulement (audio d'origine conservé, non modifié)
+
+## 10. `pub-laser-10_garcons-difficiles-a-gater_FR.mp4`
+- « “Boys are so hard to gift” 🔫😭 » → **« Les garçons sont si difficiles à gâter »** 🔫😭
+
+## 11. `pub-laser-11_maman-de-garcons-B_FR.mp4`
+- « Do NOT let a Boy mother see this...😂🔫 » → **Ne laisse PAS une maman de garçons voir ça...** 😂🔫
+
+## 12. `pub-laser-12_ne-montre-pas-maman-garcons_FR.mp4`
+- « DON'T show this to a boy mom..😳🔫 » → **NE MONTRE PAS ça à une maman de garçons..** 😳🔫
