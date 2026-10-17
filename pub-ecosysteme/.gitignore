@@ -1,0 +1,5 @@
+node_modules/
+out/*
+!out/pub_ecosysteme_9x16.mp4
+!out/pub_ecosysteme_9x16_sans_musique.mp4
+!out/storyboard.jpg
