@@ -8,13 +8,14 @@
 window.CONTENT = {
   brand: { name: "MATHISDGTMK", monogram: "M" },
 
-  // Bulle de texte en haut de l'écran (comme sur TikTok) : change à chaque temps fort. t = secondes.
+  // Texte animé en haut de l'écran : chaque phrase arrive mot par mot, reste un court instant en bougeant, puis sort.
+  // lines = lignes (mots séparés par des espaces) ; accent = lignes en dégradé lumineux ; t = secondes. t1 très grand = reste jusqu'à la fin.
   captions: [
-    { t0: 0.30, t1: 4.10, lines: ["Arrête de procrastiner ⏰"] },
-    { t0: 4.30, t1: 8.10, lines: ["Fixe ton objectif 🎯"] },
-    { t0: 8.30, t1: 12.10, lines: ["Planifie chaque étape 🧭"] },
-    { t0: 12.30, t1: 16.10, lines: ["Avance avec un suivi", "chaque semaine 📈"] },
-    { t0: 16.30, t1: 21.05, lines: ["Réserve ton appel", "lien en bio ☝️"] },
+    { t0: 0.35, t1: 2.65, lines: ["ARRÊTE DE", "PROCRASTINER ⏰"], accent: [1] },
+    { t0: 4.50, t1: 6.60, lines: ["FIXE TON", "OBJECTIF 🎯"], accent: [1] },
+    { t0: 8.50, t1: 10.55, lines: ["PLANIFIE CHAQUE", "ÉTAPE 🧭"], accent: [1] },
+    { t0: 12.50, t1: 14.55, lines: ["AVANCE AVEC", "UN SUIVI 📈"], accent: [1] },
+    { t0: 16.55, t1: 99, lines: ["RÉSERVE TON APPEL", "LIEN EN BIO ☝️"], accent: [1] },
   ],
 
   // Écran 0 : la liste « à faire » que tout le monde repousse

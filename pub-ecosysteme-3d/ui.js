@@ -227,21 +227,39 @@ export function drawButton(c) {
   c.restore();
 }
 
-// ---------- bulle de texte en haut de l'écran (calque final, dessiné par-dessus la 3D) ----------
+// ---------- texte animé en haut de l'écran (calque final, dessiné par-dessus la 3D) ----------
+// Mot par mot : arrivée avec rebond + flou qui devient net, légère dérive pendant que la phrase est affichée, sortie vers le haut.
+const IS_EMOJI = /[\u{1F300}-\u{1FAFF}\u2600-\u27BF\u23F0-\u23FF]/u;
 export function drawCaptions(c, t, s) {
-  ctx = c; const caps = C.captions;
-  caps.forEach(cp => {
-    const pin = prog(t, cp.t0, 0.42), pout = prog(t, cp.t1, 0.22); if (pin <= 0 || pout >= 1) return;
-    const e = E.outBack(pin), fs = 58 * s, lh = fs * 1.2, padX = 40 * s, padY = 26 * s;
-    c.save(); c.letterSpacing = '0px'; c.font = MS(fs, 700);
-    const w = Math.max(...cp.lines.map(l => c.measureText(l).width)) + padX * 2, h = cp.lines.length * lh + padY * 2 - (lh - fs) * 0.5;
-    const cx = c.canvas.width / 2, top = 196 * s;
-    c.globalAlpha = clamp(pin * 2.2) * (1 - E.inCubic(pout)); c.translate(cx, top + h / 2 - pout * 36 * s); const sc = 0.72 + 0.28 * e; c.scale(sc, sc);
-    c.shadowColor = 'rgba(0,0,0,.35)'; c.shadowBlur = 30 * s; c.shadowOffsetY = 8 * s; c.fillStyle = '#ffffff'; c.beginPath(); c.roundRect(-w / 2, -h / 2, w, h, 40 * s); c.fill(); c.shadowBlur = 0; c.shadowOffsetY = 0;
-    c.fillStyle = '#0a0b10'; c.textAlign = 'center'; c.textBaseline = 'middle';
-    cp.lines.forEach((l, i) => { const lp = E.outCubic(prog(t, cp.t0 + 0.03 + i * 0.07, 0.28)); c.save(); c.globalAlpha *= lp; c.fillText(l, 0, -h / 2 + padY + lh * (i + 0.5) + (1 - lp) * 14 * s - (lh - fs) * 0.25); c.restore(); });
+  ctx = c;
+  for (const cp of C.captions) {
+    if (t < cp.t0 || t > cp.t1 + 0.1) continue;
+    c.save(); c.textAlign = 'left'; c.textBaseline = 'middle';
+    const lines = cp.lines.map(l => l.split(' '));
+    const setFont = fs => { c.font = MS(fs, 800); c.letterSpacing = (-2 * s * fs / (118 * s)) + 'px'; };
+    const lineW = (toks, fs) => { setFont(fs); return toks.reduce((w, tk, i) => w + c.measureText(tk).width + (i ? fs * 0.26 : 0), 0); };
+    let size = 120 * s; while (size > 40 * s && Math.max(...lines.map(l => lineW(l, size))) > 930 * s) size -= 2 * s;
+    const lh = size * 1.1, top = 150 * s; let k = 0;
+    lines.forEach((toks, li) => {
+      const w = lineW(toks, size), y = top + lh * (li + 0.5); let x = (c.canvas.width - w) / 2; setFont(size);
+      const accent = (cp.accent || []).includes(li);
+      toks.forEach(tk => {
+        const tw = c.measureText(tk).width, st = cp.t0 + 0.11 * k, p = prog(t, st, 0.5), q = prog(t, cp.t1 - 0.42 + 0.06 * k, 0.34), emo = IS_EMOJI.test(tk);
+        const e = E.outBack(p), ec = E.outCubic(p), alpha = clamp(p * 2.6) * (1 - E.inCubic(q));
+        if (alpha > 0.004) {
+          const dy = (1 - ec) * 44 * s - q * 56 * s + (emo ? -Math.abs(Math.sin(t * 3.4 + k)) * 9 * s * (cp.t1 > 50 ? 1 : 0) : Math.sin(t * 1.6 + k * 0.8) * 3 * s);
+          const sc = (1.5 - 0.5 * e) * (1 + 0.1 * q) * (1 + 0.012 * Math.max(0, t - st)), blur = (1 - ec) * 16 * s + q * 12 * s;
+          let rot = 0; if (emo) { const lt = Math.max(0, t - st); rot = Math.sin(lt * 21) * 0.28 * Math.exp(-lt * 2.2) * (1 - q); }
+          c.save(); c.globalAlpha = alpha; c.translate(x + tw / 2, y + dy); c.rotate(rot); c.scale(sc, sc); if (blur > 0.4) c.filter = `blur(${blur}px)`;
+          c.shadowColor = 'rgba(0,0,0,.55)'; c.shadowBlur = 26 * s; c.shadowOffsetY = 7 * s;
+          if (accent && !emo) { const g = c.createLinearGradient(-tw / 2, 0, tw / 2, 0), ph = (t * 0.55) % 1.4 - 0.2; g.addColorStop(0, '#9db4ff'); g.addColorStop(clamp(ph), '#ffffff'); g.addColorStop(1, '#9db4ff'); c.fillStyle = g; c.shadowColor = 'rgba(120,150,255,.65)'; c.shadowBlur = 34 * s; c.shadowOffsetY = 0; } else c.fillStyle = '#ffffff';
+          c.fillText(tk, -tw / 2, 0); c.restore();
+        }
+        x += tw + size * 0.26; k++;
+      });
+    });
     c.restore();
-  });
+  }
 }
 // petit texte légal en bas d'écran (comme la légende sous la vidéo de référence)
 export function drawLegal(c, t, s, t0 = 16.6) {

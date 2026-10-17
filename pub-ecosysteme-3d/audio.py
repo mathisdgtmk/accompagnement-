@@ -12,7 +12,7 @@ tl = json.load(open('out/timeline.json'))
 TOTAL = tl['total']; N = int((TOTAL + 0.6) * SR)
 rng = np.random.default_rng(41); tt = np.arange(N) / SR
 EV = tl['events']; BEAT = 0.5; BAR = 2.0
-DROP = 4.0; LOGO = tl['logo'][0]; BTN = tl['button']
+DROP = 4.3; LOGO = tl['logo'][0]; BTN = tl['button']
 
 
 def bus(): return np.zeros((2, N))

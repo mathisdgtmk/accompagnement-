@@ -37,7 +37,7 @@ async function openPage(url) {
   const worker = async w => {
     const a = w * per, b = Math.min(frames, a + per); if (a >= b) return; const seg = path.join(OUT, `seg_${w}.mp4`); segs[w] = seg;
     const { browser, grab } = w === 0 ? main : await openPage(url);
-    const ff = spawn('ffmpeg', ['-y', '-loglevel', 'error', '-f', 'image2pipe', '-framerate', String(tl.fps), '-c:v', 'png', '-i', '-', '-c:v', 'libx264', '-preset', 'medium', '-crf', '17', '-pix_fmt', 'yuv420p', '-profile:v', 'high', '-g', '30', '-an', seg], { stdio: ['pipe', 'inherit', 'inherit'] });
+    const ff = spawn('ffmpeg', ['-y', '-loglevel', 'error', '-f', 'image2pipe', '-framerate', String(tl.fps), '-c:v', 'png', '-i', '-', '-vf', 'scale=out_color_matrix=bt709:out_range=limited,format=yuv420p', '-c:v', 'libx264', '-preset', 'medium', '-crf', '16', '-profile:v', 'high', '-g', '30', '-colorspace', 'bt709', '-color_primaries', 'bt709', '-color_trc', 'bt709', '-color_range', 'tv', '-an', seg], { stdio: ['pipe', 'inherit', 'inherit'] });
     const closed = new Promise(r => ff.on('close', r));
     for (let i = a; i < b; i++) { const buf = await grab(i / tl.fps); if (!ff.stdin.write(buf)) await new Promise(r => ff.stdin.once('drain', r)); if (++done % 20 === 0) console.log(`frame ${done}/${frames}  (${((Date.now() - t0) / 1000).toFixed(0)}s)`); }
     ff.stdin.end(); await closed; await browser.close();
