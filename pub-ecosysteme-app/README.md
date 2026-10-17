@@ -19,10 +19,11 @@ Rendu image par image dans Chromium (canvas), déterministe. Même moteur et mê
 | 8,6–11,8 s | **Planifie.** — « Mon plan » : anneau 0 → 100 % et 4 étapes cochées (audit, offre, acquisition, optimisation) | cloches |
 | 11,8–15 s | **Avance.** — « Cette semaine » : 2 rendez-vous individuels, courbe d'analyse, pastille « 2 rendez-vous / semaine · PREMIUM » | |
 | 15,3–17,9 s | **Choisis ta formule.** — cartes Starter et Premium qui se dessinent | |
-| 17,9–23 s | signature · « Ton cadre pour passer à l'action. » · bouton REJOINDRE L'ÉCOSYSTÈME · mathisdgtmk.com · mention légale | impact final |
+| 17,9–23 s | signature · « Ton cadre pour passer à l'action. » · bouton **RÉSERVE TON APPEL** · **Lien en bio ↑** · mention légale | impact final |
 
 Les écrans de téléphone sont des **illustrations** du service (pas des captures d'une vraie appli). Ils reprennent uniquement ce qui est sur le site :
 objectifs, aide au choix du produit, création de boutique / offre B2B, méthode étape par étape, rendez-vous individuels et analyse des performances en formule Premium.
+Appel à l'action : « Réserve ton appel » + « Lien en bio » (textes `end.button` et `end.link` dans `content.js` ; l'adresse `mathisdgtmk.com` n'est plus affichée).
 Aucun prix, chiffre d'affaires ni résultat n'est affiché ; la mention « aucun chiffre d'affaires ni résultat garanti » figure à la fin.
 
 ## Régénérer / changer les textes

@@ -440,12 +440,19 @@
     if (bp > 0) {
       ctx.save(); ctx.globalAlpha *= clamp(bp * 1.5); ctx.translate(cx, by); ctx.scale(0.85 + 0.15 * bp, 0.85 + 0.15 * bp);
       ctx.shadowColor = `rgba(${BLUE},.8)`; ctx.shadowBlur = 50 + 16 * Math.sin(lt * 2.4); const gb = ctx.createLinearGradient(0, -bh / 2, 0, bh / 2); gb.addColorStop(0, '#ffffff'); gb.addColorStop(1, '#cfd8f6'); ctx.fillStyle = gb; rr(-bw / 2, -bh / 2, bw, bh, bh / 2); ctx.fill(); ctx.shadowBlur = 0;
-      const bs = fit(E_.button, 640, 36, z => MS(z, 800), 8), tw = T(E_.button, -34, 2, { font: MS(bs, 800), ls: 8, align: 'center', fill: '#05060c' });
+      const bs = fit(E_.button, 640, 40, z => MS(z, 800), 8), tw = T(E_.button, -34, 2, { font: MS(bs, 800), ls: 8, align: 'center', fill: '#05060c' });
       const ax = -34 + tw / 2 + 52 + 6 * Math.sin(lt * 2.6); ctx.strokeStyle = '#05060c'; ctx.lineWidth = 4.5; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.beginPath(); ctx.moveTo(ax - 24, 2); ctx.lineTo(ax + 18, 2); ctx.moveTo(ax + 4, -14); ctx.lineTo(ax + 20, 2); ctx.lineTo(ax + 4, 18); ctx.stroke();
       ctx.restore(); sparks(cx - 300, by - 30, T_.end + 2.2, t, 10, 110, 77); sparks(cx + 300, by + 30, T_.end + 2.25, t, 10, 110, 78);
     }
-    const up = E.outCubic(prog(lt, 2.8, 0.8)), us = fit(C.brand.url, 860, 104, z => PF(z, 700, true));
-    ctx.save(); ctx.globalAlpha *= up; ctx.translate(0, (1 - up) * 24); T(C.brand.url, cx, 1470, { font: PF(us, 700, true), align: 'center' }); ctx.restore();
+    const up = E.outCubic(prog(lt, 2.8, 0.8)), us = fit(E_.link, 700, 116, z => PF(z, 700, true)), lw = measure(E_.link, PF(us, 700, true));
+    ctx.save(); ctx.globalAlpha *= up; ctx.translate(0, (1 - up) * 24);
+    const lx = cx - (lw + 96) / 2;
+    T(E_.link, lx, 1470, { font: PF(us, 700, true) });
+    // flèche vers le haut (le lien est dans la bio, en haut du profil) qui « respire »
+    const axc = lx + lw + 66, ayc = 1474 - 7 * Math.sin(lt * 3.2);
+    ctx.strokeStyle = WHITE; ctx.lineWidth = 6; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.shadowColor = `rgba(${BLUE},.9)`; ctx.shadowBlur = 20;
+    ctx.beginPath(); ctx.moveTo(axc, ayc + 36); ctx.lineTo(axc, ayc - 36); ctx.moveTo(axc - 26, ayc - 10); ctx.lineTo(axc, ayc - 36); ctx.lineTo(axc + 26, ayc - 10); ctx.stroke();
+    ctx.restore();
     const lg = E.outCubic(prog(lt, 3.3, 0.9));
     ctx.save(); ctx.font = MS(23, 400); const words = E_.legal.split(' '), lines = []; let line = ''; for (const w of words) { const test = line ? line + ' ' + w : w; if (ctx.measureText(test).width > 860 && line) { lines.push(line); line = w; } else line = test; } lines.push(line); ctx.restore();
     lines.forEach((l, k) => T(l, cx, 1620 + k * 34, { font: MS(23, 500), align: 'center', fill: 'rgba(232,236,248,.58)', alpha: lg }));

@@ -61,7 +61,8 @@ window.CONTENT = {
 
   end: {
     tagline: ["Ton cadre", "pour passer", "à l’action."],
-    button: "REJOINDRE L’ÉCOSYSTÈME",
+    button: "RÉSERVE TON APPEL",
+    link: "Lien en bio",
     legal: "Prestation de conseil et de soutien stratégique : aucun chiffre d’affaires ni résultat garanti.",
   },
 };
