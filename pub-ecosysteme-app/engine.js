@@ -3,7 +3,7 @@
 (() => {
   'use strict';
   const C = window.CONTENT;
-  const W = 1080, H = 1920, FPS = C.fps, TOTAL = 23.0;
+  const W = 1080, H = 1920, FPS = C.fps, SHIFT = 1.3, TOTAL = 23.0 + SHIFT;   // SHIFT : durée de l'ouverture « Arrête de procrastiner »
   const cv = document.getElementById('c');
   const mainCtx = cv.getContext('2d');
   let ctx = mainCtx;
@@ -52,7 +52,7 @@
 
   // ---------- chronologie (secondes) ----------
   const T_ = {
-    header: 0.15, headerOut: 15.0,
+    icon: 4.55, headerOut: 15.0,
     hookIn: 0.45, strike: 1.15, hookOut: 1.72,
     burst: 1.78, wordIn: 2.05, wordOut: 3.5,
     terrainIn: 3.3, arc: 3.5, arcEnd: 4.45, terrainOut: 5.0,
@@ -62,8 +62,11 @@
   };
   // événements sonores (lus par audio.py)
   const events = [];
-  const ev = (t, type, n = 0) => events.push({ t, type, n });
-  ev(0.15, 'pop'); ev(0.45, 'pop'); ev(0.9, 'riser', 0); ev(1.15, 'swish'); ev(1.78, 'impact');
+  const ev = (t, type, n = 0) => events.push({ t: t + SHIFT, type, n });          // temps de la chronologie principale (décalés)
+  const ev0 = (t, type, n = 0) => events.push({ t, type, n });                  // temps réels (ouverture)
+  ev0(0.08, 'whoosh'); ev0(0.16, 'punch', 0); ev0(0.40, 'punch', 1); ev0(0.78, 'pop'); ev0(0.80, 'ding', 5); ev0(1.0, 'ding', 3); ev0(1.12, 'swish');
+  ev(0.45, 'pop'); ev(4.55, 'pop');
+  ev(0.9, 'riser', 0); ev(1.15, 'swish'); ev(1.78, 'impact');
   ev(2.05, 'shimmer'); ev(3.3, 'whoosh'); ev(3.5, 'sweep'); ev(3.45, 'pop'); ev(4.4, 'pop');
   ev(4.7, 'whoosh'); ev(5.15, 'hit', 0);
   [T_.goal[0], T_.plan[0], T_.follow[0], T_.formulas[0]].forEach((t, i) => { ev(t, 'punch', i); });
@@ -74,7 +77,7 @@
   ev(11.8, 'whoosh'); ev(12.6, 'check', 3); ev(13.15, 'check', 5); ev(13.3, 'sweep'); ev(14.3, 'pop'); ev(14.33, 'ding', 5);
   ev(15.0, 'whoosh'); ev(15.25, 'whoosh'); ev(16.1, 'ding', 3); ev(16.6, 'ding', 4);
   ev(17.85, 'impact'); ev(18.45, 'tick', 0); ev(18.85, 'tick', 1); ev(19.25, 'tick', 2); ev(20.0, 'pop'); ev(20.05, 'ding', 5); ev(20.6, 'ding', 2);
-  window.TIMELINE = { total: TOTAL, fps: FPS, events, risers: [[0.9, 1.78], [3.0, 3.5], [14.5, 15.25], [17.2, 17.85]] };
+  window.TIMELINE = { total: TOTAL, fps: FPS, shift: SHIFT, burst: T_.burst + SHIFT, end: T_.end + SHIFT, events, risers: [[0.9, 1.78], [3.0, 3.5], [14.5, 15.25], [17.2, 17.85]].map(([a, b]) => [a + SHIFT, b + SHIFT]) };
 
   // ---------- décor ----------
   const rs = mulberry32(7);
@@ -403,20 +406,39 @@
     });
   }
 
-  // ====================== EN-TÊTE FIXE (icône + phrase d'accroche) ======================
-  function drawHeader(t) {
-    const p = prog(t, T_.header, 0.6), out = prog(t, T_.headerOut, 0.5); if (p <= 0 || out >= 1) return;
-    const H_ = C.header, e = E.outBack(p);
-    ctx.save(); ctx.globalAlpha *= clamp(p * 2) * (1 - E.inCubic(out)); ctx.translate(0, -out * 30);
-    // icône d'application (monogramme)
-    ctx.save(); ctx.translate(W / 2, 205); ctx.scale(0.7 + 0.3 * e, 0.7 + 0.3 * e); ctx.shadowColor = 'rgba(0,0,0,.6)'; ctx.shadowBlur = 40;
-    const g = ctx.createLinearGradient(0, -90, 0, 90); g.addColorStop(0, '#ffffff'); g.addColorStop(1, '#dfe4f3'); ctx.fillStyle = g; rr(-90, -90, 180, 180, 44); ctx.fill(); ctx.shadowBlur = 0;
-    T(C.brand.monogram, 0, 10, { font: PF(138, 800, true), align: 'center', fill: '#05060c' });
+  // ====================== OUVERTURE : « Arrête de procrastiner » en grand, mot par mot (temps réel) ======================
+  function drawTitle(t) {
+    const L = C.hookTitle, out = prog(t, 1.1, 0.42); if (t > 1.6) return;
+    const size = Math.min(...L.lines.map(s => fit(s, 850, 176, z => MS(z, 800), -5))), y0 = 820, lh = size * 1.12;
+    ctx.save(); ctx.globalAlpha *= 1 - E.inCubic(out); const sc = 1 + 0.07 * E.inCubic(out); ctx.translate(W / 2, 960); ctx.scale(sc, sc); ctx.translate(-W / 2, -960);
+    L.lines.forEach((ln, i) => {
+      const p = prog(t, 0.1 + i * 0.22, 0.6), e = E.outCubic(p); if (p <= 0) return;
+      const y = y0 + i * lh, last = i === L.lines.length - 1;
+      ctx.save(); ctx.beginPath(); ctx.rect(0, y - lh * 0.6, W, lh * 1.2); ctx.clip(); ctx.translate(0, (1 - E.outQuart(p)) * lh * 0.9);
+      ctx.font = MS(size, 800); ctx.letterSpacing = '-5px'; ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
+      const tw = ctx.measureText(ln).width, ew = last ? size * 1.05 : 0, x = (W - tw - ew) / 2;
+      const g = ctx.createLinearGradient(0, y - size / 2, 0, y + size / 2); g.addColorStop(0, '#ffffff'); g.addColorStop(1, '#a9b6e0');
+      ctx.filter = `blur(${(1 - e) * 16}px)`; ctx.globalAlpha *= clamp(p * 2); ctx.shadowColor = `rgba(${BLUE},.65)`; ctx.shadowBlur = 40; ctx.fillStyle = g; ctx.fillText(ln, x, y);
+      ctx.restore();
+      if (last) {      // le réveil sonne : petit rebond puis tremblement
+        const ep = prog(t, 0.62, 0.35), eb = E.outBack(ep); if (ep > 0) {
+          const ex = (W - tw - ew) / 2 + tw + size * 0.18, wob = Math.sin(Math.max(0, t - 0.8) * 55) * 0.16 * clamp(1 - (t - 0.8) / 0.35) * (t > 0.8 ? 1 : 0);
+          ctx.save(); ctx.translate(ex + size * 0.4, y); ctx.rotate(wob); ctx.scale(eb, eb); ctx.font = `${size * 0.9}px "Noto Color Emoji", MS, sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(L.emoji, 0, 6); ctx.restore();
+        }
+      }
+    });
     ctx.restore();
-    // phrase d'accroche
-    const full = H_.title + ' ' + H_.emoji, size = fit(full, 940, 92, z => PF(z, 800, true));
-    const lp = E.outCubic(prog(t, T_.header + 0.2, 0.6)); ctx.save(); ctx.globalAlpha *= lp; ctx.translate(0, (1 - lp) * 20);
-    T(full, W / 2, 400, { font: PF(size, 800, true), align: 'center', glow: `rgba(${BLUE},.5)`, glowBlur: 30 }); ctx.restore();
+  }
+
+  // ====================== ICÔNE « MINUTEUR » (discrète, en haut) ======================
+  function drawHeader(t) {
+    const p = prog(t, T_.icon, 0.6), out = prog(t, T_.headerOut, 0.5); if (p <= 0 || out >= 1) return;
+    const e = E.outBack(p), prg = clamp((t - T_.phoneIn) / (T_.phoneOut - T_.phoneIn));
+    ctx.save(); ctx.globalAlpha *= clamp(p * 2) * (1 - E.inCubic(out)); ctx.translate(W / 2, 230 - out * 30); ctx.scale(0.7 + 0.3 * e, 0.7 + 0.3 * e);
+    ctx.lineWidth = 5; ctx.lineCap = 'round'; ctx.strokeStyle = 'rgba(255,255,255,.14)'; ctx.beginPath(); ctx.arc(0, 0, 100, 0, 6.283); ctx.stroke();
+    ctx.save(); ctx.shadowColor = `rgba(${BLUE},.95)`; ctx.shadowBlur = 20; ctx.strokeStyle = WHITE; ctx.beginPath(); ctx.arc(0, 0, 100, -Math.PI / 2, -Math.PI / 2 + 6.283 * prg); ctx.stroke(); ctx.restore();
+    ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.6)'; ctx.shadowBlur = 30; const g = ctx.createLinearGradient(0, -64, 0, 64); g.addColorStop(0, '#ffffff'); g.addColorStop(1, '#dfe4f3'); ctx.fillStyle = g; rr(-64, -64, 128, 128, 32); ctx.fill(); ctx.restore();
+    T(C.brand.monogram, 0, 7, { font: PF(100, 800, true), align: 'center', fill: '#05060c' });
     ctx.restore();
   }
 
@@ -465,14 +487,18 @@
     drawBackground(t);
     ctx.save();
     const zoom = 1 + 0.025 * (t / TOTAL); ctx.translate(W / 2, H / 2); ctx.scale(zoom, zoom); ctx.translate(-W / 2, -H / 2);
-    drawHook(t); drawBurst(t); drawTerrain(t); drawPhone(t);
-    // pastilles (devant le téléphone)
-    const S = C.screens;
-    pill(S.goal.pill, 540, 1530, 8.3, t, { out: 8.6 });
-    pill(S.plan.pill, 540, 1560, 11.2, t, { out: 11.8 });
-    pill(S.follow.pill, 540, 1600, 14.3, t, { tag: S.follow.pillTag, out: 15.0, size: 33 });
-    word(C.words.goal, T_.goal, t); word(C.words.plan, T_.plan, t); word(C.words.follow, T_.follow, t); word(C.words.formulas, T_.formulas, t, 640);
-    drawCards(t); drawHeader(t); drawEnd(t);
+    const u = t - SHIFT;
+    drawTitle(t);
+    if (u >= 0) {
+      drawHook(u); drawBurst(u); drawTerrain(u); drawPhone(u);
+      // pastilles (devant le téléphone)
+      const S = C.screens;
+      pill(S.goal.pill, 540, 1530, 8.3, u, { out: 8.6 });
+      pill(S.plan.pill, 540, 1560, 11.2, u, { out: 11.8 });
+      pill(S.follow.pill, 540, 1600, 14.3, u, { tag: S.follow.pillTag, out: 15.0, size: 33 });
+      word(C.words.goal, T_.goal, u); word(C.words.plan, T_.plan, u); word(C.words.follow, T_.follow, u); word(C.words.formulas, T_.formulas, u, 640);
+      drawCards(u); drawHeader(u); drawEnd(u);
+    }
     ctx.restore();
     ctx.globalAlpha = 1; drawFinish(t);
   };

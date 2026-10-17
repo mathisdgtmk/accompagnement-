@@ -14,7 +14,8 @@ N = int((TOTAL + 0.6) * SR)
 rng = np.random.default_rng(31)
 tt = np.arange(N) / SR
 EV = tl['events']
-BURST, END = 1.78, 17.85
+SH = tl.get('shift', 0.0)                                   # durée de l'ouverture « Arrête de procrastiner »
+BURST, END = tl.get('burst', 1.78), tl.get('end', 17.85)
 BPM = 120; BEAT = 60.0 / BPM
 
 
@@ -149,7 +150,7 @@ for b in range(nbar):
             put(pad_b, ts, s * e, 0.035 * quiet, rng.uniform(-0.7, 0.7))
     for k in range(8):
         tb = ts + k * BEAT / 2
-        if tb < 3.3 or tb > TOTAL:
+        if tb < 3.3 + SH or tb > TOTAL:
             continue
         nb = int(BEAT * 0.9 * SR); tv_ = tvec(nb); f = midi(ROOTS[b % 4] + (12 if k in (3, 7) else 0))
         s = np.sin(2 * np.pi * f * tv_) + 0.35 * np.sin(4 * np.pi * f * tv_)
@@ -159,12 +160,12 @@ pad_b = filt(pad_b, 'lowpass', 1800)
 ARPN = [[69, 72, 76, 79, 81, 79, 76, 72], [65, 69, 72, 76, 77, 76, 72, 69], [67, 72, 76, 79, 83, 79, 76, 72], [67, 71, 74, 79, 81, 79, 74, 71]]
 k = 0
 while True:
-    tt0 = 3.3 + k * BEAT / 2
+    tt0 = 3.3 + SH + k * BEAT / 2
     if tt0 > END + 3.2:
         break
     b = int((tt0 - BURST) // BAR) % 4
     note = ARPN[b][k % 8]
-    swell = min(1.0, (tt0 - 3.3) / 3.0) * (0.8 if tt0 > END - 0.5 else 1.0)
+    swell = min(1.0, (tt0 - 3.3 - SH) / 3.0) * (0.8 if tt0 > END - 0.5 else 1.0)
     g = 0.11 * swell * (1.0 if k % 4 == 0 else 0.7)
     s = pluck(midi(note))
     put(arp_b, tt0, s, g, 0.4 * (1 if k % 2 else -1))
@@ -173,11 +174,11 @@ while True:
 
 # batterie douce : pouls de la carte jusqu'à la fin de la démo
 kick_times = []
-t = 3.3
+t = 3.3 + SH
 while t < END - 0.2:
     put(drum_b, t, kick(0.8), 0.7); kick_times.append(t)
     t += BEAT
-t = 5.15 + BEAT / 2
+t = 5.15 + SH + BEAT / 2
 while t < END - 0.5:
     put(drum_b, t, hat(), 0.09, 0.2); t += BEAT
 

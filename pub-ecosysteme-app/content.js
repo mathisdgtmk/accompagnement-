@@ -15,8 +15,8 @@ window.CONTENT = {
     url: "mathisdgtmk.com",
   },
 
-  // En-tête fixe en haut de l'écran (icône + phrase d'accroche), comme les vidéos « animation d'appli »
-  header: { title: "Arrête de procrastiner", emoji: "⏰" },
+  // Ouverture animée : la phrase arrive mot par mot en grand, le ⏰ sonne, puis « Demain. » est rayé
+  hookTitle: { lines: ["Arrête de", "procrastiner."], emoji: "⏰" },
 
   // Accroche : « demain » est rayé, puis la marque éclate
   hook: { word: "Demain." },

@@ -1,6 +1,6 @@
 # Pub « écosystème » — version animation d'application
 
-Vidéo verticale (9:16, 1080×1920, 23 s) dans le style des « pubs d'appli » animées : marque qui éclate, téléphone en perspective 3D
+Vidéo verticale (9:16, 1080×1920, 24,3 s) dans le style des « pubs d'appli » animées : marque qui éclate, téléphone en perspective 3D
 dont l'écran change, mots-chocs, chiffres qui défilent, cartes qui se dessinent, signature avec slogan.
 Rendu image par image dans Chromium (canvas), déterministe. Même moteur et mêmes polices (Playfair / Montserrat) que `../video/`.
 
@@ -12,8 +12,8 @@ Rendu image par image dans Chromium (canvas), déterministe. Même moteur et mê
 ## Déroulé
 | Temps | À l'écran | Son |
 |---|---|---|
-| 0–1,8 s | En-tête fixe « Arrête de procrastiner ⏰ » · pastille « Demain. » qui est rayée | montée de tension |
-| 1,8–3,5 s | la marque MATHISDGTMK éclate en rayons | impact + éclat de cloches |
+| 0–3,1 s | **Ouverture animée** : « Arrête de procrastiner. ⏰ » arrive en grand, mot par mot, puis la pastille « Demain. » est rayée | montée de tension |
+| 3,1–4,8 s | la marque MATHISDGTMK éclate en rayons | impact + éclat de cloches |
 | 3,3–5 s | carte en points : arc lumineux de « Aujourd'hui » à « Ton objectif » | balayage |
 | 5–8,6 s | **Fixe.** — écran « Ma semaine » : objectif tapé au clavier, 3 coches, bouton, pastille « Objectif défini » | clics de frappe, coches qui montent |
 | 8,6–11,8 s | **Planifie.** — « Mon plan » : anneau 0 → 100 % et 4 étapes cochées (audit, offre, acquisition, optimisation) | cloches |
